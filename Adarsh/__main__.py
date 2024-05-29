@@ -5,13 +5,15 @@ import asyncio
 import logging
 import importlib
 from pathlib import Path
-from pyrogram import Client, idle
+from pyrogram import idle, Client
 from .bot import StreamBot
 from .vars import Var
 from aiohttp import web
 from .server import web_server
 from .utils.keepalive import ping_server
 from Adarsh.bot.clients import initialize_clients
+import ntplib
+from time import ctime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +27,24 @@ files = glob.glob(ppath)
 
 loop = asyncio.get_event_loop()
 
+async def synchronize_time():
+    try:
+        client = ntplib.NTPClient()
+        response = client.request('pool.ntp.org')
+        ntp_time = ctime(response.tx_time)
+        system_time = ctime()
+        time_difference = abs(response.tx_time - time.time())
+        if time_difference > 60:
+            logging.error(f"Time difference too high: {time_difference} seconds. Syncing system time...")
+            raise Exception("System time is out of sync with NTP server.")
+        logging.info(f"System time synchronized: {system_time} vs {ntp_time}")
+    except Exception as e:
+        logging.error(f"Failed to synchronize time: {e}")
+        sys.exit(1)
+
 async def start_services():
+    await synchronize_time()
+    
     print('\n')
     print('------------------- Initializing Telegram Bot -------------------')
     await StreamBot.start()
