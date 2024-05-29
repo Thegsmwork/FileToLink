@@ -1,4 +1,3 @@
-# (c) adarsh-goel
 import os
 import sys
 import glob
@@ -6,7 +5,7 @@ import asyncio
 import logging
 import importlib
 from pathlib import Path
-from pyrogram import idle
+from pyrogram import Client, idle
 from .bot import StreamBot
 from .vars import Var
 from aiohttp import web
@@ -20,17 +19,16 @@ logging.basicConfig(
 )
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
-logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
 ppath = "Adarsh/bot/plugins/*.py"
 files = glob.glob(ppath)
-StreamBot.start()
-loop = asyncio.get_event_loop()
 
+loop = asyncio.get_event_loop()
 
 async def start_services():
     print('\n')
-    print('------------------- Initalizing Telegram Bot -------------------')
+    print('------------------- Initializing Telegram Bot -------------------')
+    await StreamBot.start()
     bot_info = await StreamBot.get_me()
     StreamBot.username = bot_info.username
     print("------------------------------ DONE ------------------------------")
@@ -57,26 +55,25 @@ async def start_services():
         print("------------------ Starting Keep Alive Service ------------------")
         print()
         asyncio.create_task(ping_server())
-    print('-------------------- Initalizing Web Server -------------------------')
+    print('-------------------- Initializing Web Server --------------------')
     app = web.AppRunner(await web_server())
     await app.setup()
-    bind_address = "0.0.0.0" if Var.ON_HEROKU else Var.BIND_ADRESS
+    bind_address = "0.0.0.0" if Var.ON_HEROKU else Var.BIND_ADDRESS
     await web.TCPSite(app, bind_address, Var.PORT).start()
-    print('----------------------------- DONE ---------------------------------------------------------------------')
+    print('----------------------------- DONE ------------------------------')
     print('\n')
-    print('---------------------------------------------------------------------------------------------------------')
     print('---------------------------------------------------------------------------------------------------------')
     print(' follow me for more such exciting bots! https://github.com/adarsh-goel')
     print('---------------------------------------------------------------------------------------------------------')
     print('\n')
-    print('----------------------- Service Started -----------------------------------------------------------------')
+    print('----------------------- Service Started --------------------------')
     print('                        bot =>> {}'.format((await StreamBot.get_me()).first_name))
     print('                        server ip =>> {}:{}'.format(bind_address, Var.PORT))
     print('                        Owner =>> {}'.format((Var.OWNER_USERNAME)))
     if Var.ON_HEROKU:
-        print('                        app runnng on =>> {}'.format(Var.FQDN))
+        print('                        app running on =>> {}'.format(Var.FQDN))
     print('---------------------------------------------------------------------------------------------------------')
-    print('Give a star to my repo https://github.com/adarsh-goel/filestreambot-pro  also follow me for new bots')
+    print('Give a star to my repo https://github.com/adarsh-goel/filestreambot-pro also follow me for new bots')
     print('---------------------------------------------------------------------------------------------------------')
     await idle()
 
